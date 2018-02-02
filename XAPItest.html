@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../dist/xapiwrapper.min.js"></script>
+    <script type="text/javascript">
+
+        var newConf = {
+            "endpoint": "https://lrs.adlnet.gov/xapi/",
+            "user": "JoeyBowser",
+            "password": "LRS.Koop.5",
+        };
+        ADL.XAPIWrapper.changeConfig(newConf);
+
+        //SENDS AND DISPLAYS SENT STATEMENT
+        function SendStatement()
+        {
+			var stmt = new ADL.XAPIStatement(
+				new ADL.XAPIStatement.Agent(ADL.XAPIWrapper.hash('mailto:joey.bowser.ctr@adlnet.gov'), 'Joey Bowser'),
+            	ADL.verbs.launched,
+            //new ADL.XAPIStatement.Verb('http://adlnet.gov/expapi/verbs/launched', 'launched'),
+				new ADL.XAPIStatement.Activity('act:wrapper_test_id', 'More Testing',
+					'Test page exercising the functions of the xAPIWrapper')
+            );
+
+			stmt.generateId();
+			stmt.addOtherContextActivity( new ADL.XAPIStatement.Activity('compId:internet_proficiency') );
+            stmt.generateRegistration();
+
+			//ADL.XAPIWrapper.changeConfig({
+			//	'endpoint': 'https://lrs.adlnet.gov/xapi/'
+			//});
+
+			ADL.XAPIWrapper.sendStatement(stmt);
+
+            console.log(JSON.stringify(stmt, null, '    '));
+
+			var o = document.getElementById('statements_text');
+			o.innerText = JSON.stringify(stmt, null, '    ');
+        }
+        //GET AND DISPLAYS STATEMENTS
+        function GetStatements() {
+
+            var ret = ADL.XAPIWrapper.getStatements();
+            if (ret)
+                ADL.XAPIWrapper.log(ret.statements);
+
+            console.log(JSON.stringify(ret.statements, null, '    '));
+
+            var o = document.getElementById('statements_text');
+            o.innerText = JSON.stringify(ret.statements, null, '    ');
+
+        }
+        //GETS AND DISPLAYS STATEMENT BASED ON SEARCH
+        function GetStatement() {
+
+            var search = ADL.XAPIWrapper.searchParams();
+            search['verb'] = ADL.verbs.launched.id;
+            search['activity'] = "act:wrapper_test_id";
+            //search['related_activities'] = "true";
+            var res = ADL.XAPIWrapper.getStatements(search);
+            ADL.XAPIWrapper.log(res.statements);
+
+            console.log(JSON.stringify(res.statements, null, '    '));
+
+            var o = document.getElementById('statements_text');
+            o.innerText = JSON.stringify(res.statements, null, '    ');
+
+        }
+
+        //GETS AND DISPLAYS ACTIVITY IN STATEMENT
+        function GetActivity() {
+            var res = ADL.XAPIWrapper.getActivities("act:wrapper_test_id");
+            ADL.XAPIWrapper.log(res);
+
+            console.log(JSON.stringify(res, null, '    '));
+
+            var o = document.getElementById('statements_text');
+            o.innerText = JSON.stringify(res, null, '    ');
+        }
+
+    </script>
+</head>
+<body>
+<!--<body onload='init()'>
+    <code><pre id='output'></pre></code>-->
+    <button id="thisButton" onclick="SendStatement()">Send Statements</button>
+    <button id="thisButton" onclick="GetStatements()">Get Statements</button>
+    <button id="thisButton" onclick="GetStatement()">Get Statement</button>
+    <button id="thisButton" onclick="GetActivity()">Get Activity</button>
+
+    <h3>Statements</h3>
+    <div style="background-color: gray; width: 500px; height: auto">
+        <p id="statements_text"></p>
+    </div>
+</body>
+</html>
